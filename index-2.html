@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>なる検定</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9F0EC;
+  --paper:#FFFFFF;
+  --print:#1E9B7B;
+  --print-deep:#14795F;
+  --print-soft:#BCE2D6;
+  --tint:#EDF7F3;
+  --on-print:#FFFFFF;
+  --ink:#22282B;
+  --ink-soft:#5C666A;
+  --graphite:#43464D;
+  --pen:#E2332F;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614;
+    --paper:#19211E;
+    --print:#4CC2A3;
+    --print-deep:#4CC2A3;
+    --print-soft:#2D4B42;
+    --tint:#1F2D29;
+    --on-print:#0E1714;
+    --ink:#E8EEEA;
+    --ink-soft:#A3AFAA;
+    --graphite:#D2D6DB;
+    --pen:#FF6F66;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614;
+  --paper:#19211E;
+  --print:#4CC2A3;
+  --print-deep:#4CC2A3;
+  --print-soft:#2D4B42;
+  --tint:#1F2D29;
+  --on-print:#0E1714;
+  --ink:#E8EEEA;
+  --ink-soft:#A3AFAA;
+  --graphite:#D2D6DB;
+  --pen:#FF6F66;
+}
+
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none !important}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+  font-size:16px;
+  line-height:1.7;
+  -webkit-text-size-adjust:100%;
+}
+.hand{
+  font-family:"Yomogi","Hiragino Maru Gothic ProN","Yu Gothic",cursive;
+  color:var(--pen);
+}
+
+/* 答案用紙 */
+.sheet{
+  position:relative;
+  max-width:520px;
+  margin:16px auto;
+  padding:28px 20px 32px 40px;
+  background:var(--paper);
+  border:1.5px solid var(--print);
+}
+/* マークシートの端にある読み取り用の目印 */
+.sheet::before{
+  content:"";
+  position:absolute;
+  left:14px;top:22px;bottom:22px;
+  width:7px;
+  background:repeating-linear-gradient(to bottom,var(--ink) 0 9px,transparent 9px 26px);
+}
+@media (max-width:552px){
+  .sheet{margin:10px}
+}
+
+h1,h2,h3,p,ol,ul{margin:0}
+ol,ul{padding:0;list-style:none}
+
+button{
+  font:inherit;
+  color:inherit;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+:focus-visible{outline:3px solid var(--print);outline-offset:3px}
+
+.btn{
+  min-height:54px;
+  padding:0 22px;
+  border-radius:8px;
+  border:1.5px solid var(--print-deep);
+  background:var(--paper);
+  color:var(--print-deep);
+  font-weight:700;
+}
+.btn.primary{
+  background:var(--print-deep);
+  color:var(--on-print);
+}
+.btn:disabled{opacity:.38;cursor:default}
+
+/* 表紙 */
+.cover h1{
+  font-size:clamp(2.6rem,13vw,3.6rem);
+  font-weight:900;
+  letter-spacing:.14em;
+  line-height:1.2;
+  padding-bottom:14px;
+  border-bottom:4px double var(--print);
+}
+.cover .lead{margin-top:18px}
+.rules{
+  margin-top:22px;
+  padding:16px 16px 16px 18px;
+  background:var(--tint);
+  border-left:4px solid var(--print);
+}
+.rules h2{font-size:.95rem;font-weight:700;color:var(--print-deep)}
+.rules ol{margin-top:6px;counter-reset:r}
+.rules li{
+  counter-increment:r;
+  position:relative;
+  padding-left:1.7em;
+  font-size:.95rem;
+}
+.rules li + li{margin-top:4px}
+.rules li::before{
+  content:counter(r) ".";
+  position:absolute;left:0;
+  font-weight:700;color:var(--print-deep);
+}
+.field{margin-top:24px}
+.field label{display:block;font-size:.9rem;color:var(--ink-soft)}
+.field input{
+  display:block;
+  width:100%;
+  margin-top:4px;
+  padding:10px 2px;
+  border:0;
+  border-bottom:1.5px solid var(--print);
+  border-radius:0;
+  background:transparent;
+  color:var(--ink);
+  font:inherit;
+  font-size:1.1rem;
+}
+.cover .btn{width:100%;margin-top:28px;font-size:1.05rem}
+
+/* 問題 */
+.q-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.q-count{font-weight:700;color:var(--print-deep)}
+.q-count b{font-size:1.7rem;font-weight:900;margin:0 .1em}
+.progress{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.progress li{
+  width:15px;height:9px;
+  border:1.5px solid var(--print);
+  border-radius:999px;
+}
+.progress li.done{background:var(--graphite);border-color:var(--graphite)}
+.progress li.now{box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--print)}
+.q-text{
+  margin-top:22px;
+  min-height:3.1em;
+  font-size:1.35rem;
+  font-weight:700;
+  line-height:1.5;
+}
+.q-text:focus{outline:none}
+.choices{margin-top:14px;display:grid;gap:10px}
+.choice{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:14px;
+  align-items:center;
+  width:100%;
+  min-height:60px;
+  padding:12px 14px;
+  border:1.5px solid var(--print-soft);
+  border-radius:8px;
+  background:var(--paper);
+  text-align:left;
+  font-size:1.05rem;
+  font-weight:500;
+  line-height:1.45;
+}
+.choice[aria-pressed="true"]{border-color:var(--graphite);background:var(--tint)}
+.bubble{
+  position:relative;
+  display:grid;place-items:center;
+  width:46px;height:25px;
+  border:1.5px solid var(--print);
+  border-radius:999px;
+  overflow:hidden;
+  color:var(--print-deep);
+  font-size:.8rem;font-weight:700;line-height:1;
+}
+/* えんぴつで塗る */
+.bubble::after{
+  content:"";
+  position:absolute;inset:-1px;
+  background:repeating-linear-gradient(115deg,var(--graphite) 0 3px,color-mix(in srgb,var(--graphite) 80%,transparent) 3px 5px);
+  clip-path:inset(0 100% 0 0);
+  transition:clip-path .22s ease-out;
+}
+.choice[aria-pressed="true"] .bubble::after{clip-path:inset(0 0 0 0)}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:22px}
+.nav .btn{flex:1}
+
+/* 採点結果 */
+.result h2{
+  font-size:1.5rem;font-weight:900;letter-spacing:.14em;
+  padding-bottom:10px;border-bottom:4px double var(--print);
+}
+.examinee{margin-top:12px;color:var(--ink-soft)}
+.score-row{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:16px;min-height:132px;
+}
+.score-row svg{width:128px;height:128px;flex:none}
+.score-row svg path{fill:none;stroke:var(--pen);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.pen-draw{
+  stroke-dasharray:var(--len);
+  stroke-dashoffset:var(--len);
+  animation:draw 1.3s .25s ease-out forwards;
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+.score{
+  font-size:5rem;line-height:1.05;
+  padding:0 6px 2px;
+  border-bottom:5px double var(--pen);
+  transform:rotate(-4deg);
+}
+.score small{font-size:1.9rem;margin-left:2px}
+.verdict{
+  margin-top:18px;
+  padding:12px 14px;
+  background:var(--tint);
+  border-left:4px solid var(--print);
+  font-size:1.2rem;font-weight:900;letter-spacing:.06em;
+}
+.comment{margin-top:12px;font-size:1.3rem;line-height:1.5}
+.tally{margin-top:6px;color:var(--ink-soft)}
+.send{margin-top:14px;font-size:.92rem;color:var(--ink-soft)}
+.result h3{
+  margin-top:30px;
+  font-size:1.05rem;font-weight:700;color:var(--print-deep);
+  padding-bottom:6px;border-bottom:1.5px solid var(--print);
+}
+.review li{
+  display:grid;grid-template-columns:34px 1fr;gap:10px;
+  padding:14px 0;
+  border-bottom:1px solid var(--print-soft);
+}
+.review svg{width:32px;height:32px;margin-top:2px}
+.review svg *{fill:none;stroke:var(--pen);stroke-width:2.4;stroke-linecap:round}
+.review .rq{font-weight:700;line-height:1.5}
+.review .rq span{color:var(--print-deep);margin-right:.5em}
+.review .ra{font-size:.95rem;color:var(--ink-soft)}
+.review .rc{font-size:1.15rem;line-height:1.4}
+.result .btn{width:100%;margin-top:26px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+@media (prefers-reduced-motion:reduce){
+  .bubble::after{transition:none}
+  .pen-draw{animation:none;stroke-dashoffset:0}
+}
+</style>
+</head>
+<body>
+
+<main class="sheet">
+
+  <!-- 表紙 -->
+  <section class="cover" id="cover">
+    <h1>なる検定</h1>
+    <p class="lead">なるのことをどれだけ知っているか、<span id="total-a">15</span>問でたしかめる試験です。</p>
+
+    <div class="rules">
+      <h2>受ける前に</h2>
+      <ol>
+        <li>問題は全部で<span id="total-b">15</span>問、すべて四択です。</li>
+        <li>答えを選ぶと次の問題へ進みます。「もどる」で選び直せます。</li>
+        <li>最後に「採点する」を押すと、すぐに結果が出ます。</li>
+        <li><span id="pass-line">9</span>問以上の正解で合格です。</li>
+      </ol>
+    </div>
+
+    <div class="field">
+      <label for="name">受験者のなまえ（書かなくても受けられます）</label>
+      <input id="name" type="text" maxlength="20" autocomplete="off">
+    </div>
+
+    <button class="btn primary" id="start" type="button">試験をはじめる</button>
+  </section>
+
+  <!-- 問題 -->
+  <section id="quiz" hidden>
+    <div class="q-head">
+      <p class="q-count">問<b id="q-num">1</b>／<span id="q-total">15</span></p>
+    </div>
+    <ol class="progress" id="progress" aria-hidden="true"></ol>
+    <h2 class="q-text" id="q-text" tabindex="-1"></h2>
+    <ul class="choices" id="choices"></ul>
+    <div class="nav">
+      <button class="btn" id="back" type="button">もどる</button>
+      <button class="btn primary" id="next" type="button">つぎへ</button>
+    </div>
+  </section>
+
+  <!-- 採点結果 -->
+  <section class="result" id="result" hidden>
+    <h2 id="result-title" tabindex="-1">採点結果</h2>
+    <p class="examinee" id="examinee" hidden></p>
+    <div class="score-row" id="score-row"></div>
+    <p class="verdict" id="verdict"></p>
+    <p class="comment hand" id="comment"></p>
+    <p class="tally" id="tally"></p>
+    <p class="send">この画面をスクリーンショットして、なるに送ってください。</p>
+
+    <h3>答え合わせ</h3>
+    <ol class="review" id="review"></ol>
+
+    <button class="btn" id="retry" type="button">もう一度受ける</button>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  // a が正解、o がハズレの選択肢
+  var QUESTIONS = [
+    {q:'なるの好きな食べ物は？', a:'ショートケーキ', o:['チーズケーキ','ガトーショコラ','モンブラン']},
+    {q:'なるの苦手な食べ物は？', a:'トマト', o:['ピーマン','なす','きゅうり']},
+    {q:'なるの好きな色は？', a:'水色', o:['青','ミントグリーン','白']},
+    {q:'休みの日、なるがよくしていることは？', a:'ゴロゴロする', o:['カフェめぐり','お菓子作り','買い物']},
+    {q:'なるの口癖は？', a:'「めんどくさい」', o:['「だるい」','「ねむい」','「むり」']},
+    {q:'なるの好きな季節は？', a:'春', o:['夏','秋','冬']},
+    {q:'なるがコンビニでつい買ってしまうものは？', a:'たばこ', o:['新作スイーツ','アイス','チョコ']},
+    {q:'なるの生活リズムは？', a:'夜型', o:['朝型','日によってバラバラ','平日は朝型、休みの日は夜型']},
+    {q:'なるが今いちばん行きたい場所は？', a:'ベッド', o:['こたつ','温泉','海']},
+    {q:'なるがもらって一番うれしいものは？', a:'スイーツ', o:['花束','アクセサリー','手紙']},
+    {q:'なるの好きな飲み物は？', a:'抹茶クリームフラペチーノ', o:['抹茶ラテ','キャラメルフラペチーノ','ほうじ茶ラテ']},
+    {q:'なるは何派？', a:'猫派', o:['犬派','どっちも同じくらい','うさぎ派']},
+    {q:'なるの機嫌が悪いとき、どうするのが正解？', a:'甘いものを与える', o:['ごはんに連れて行く','そっとしておく','話を聞く']},
+    {q:'なるのストレス解消法は？', a:'カラオケ', o:['甘いものを食べる','ひたすら寝る','買い物']},
+    {q:'なるの子どもの頃の夢は？', a:'ケーキ屋さん', o:['パン屋さん','アイス屋さん','お花屋さん']},
+    {q:'なるの好きな歌手・アーティストは？', a:'メガテラ', o:['YOASOBI','Ado','あいみょん']},
+    {q:'なるがよく行くお店は？', a:'サイゼリヤ', o:['ガスト','ココス','ジョナサン']},
+    {q:'なるの誕生日は？', a:'5月15日', o:['5月5日','5月25日','6月15日']},
+    {q:'なるの好きなお菓子は？', a:'カントリーマアム', o:['ブラックサンダー','ルマンド','チョコパイ']},
+    {q:'なるの好きな作品は？', a:'後宮の烏', o:['薬屋のひとりごと','十二国記','彩雲国物語']}
+  ];
+  var LABELS = ['ア','イ','ウ','エ'];
+  var TOTAL = QUESTIONS.length;
+  var PASS = Math.ceil(TOTAL * 0.7);
+  var HIGH = Math.ceil(TOTAL * 0.85);
+
+  var $ = function(id){ return document.getElementById(id); };
+  var cover = $('cover'), quiz = $('quiz'), result = $('result');
+  var sets = [], answers = [], idx = 0, timer = null, examinee = '';
+
+  $('total-a').textContent = TOTAL;
+  $('total-b').textContent = TOTAL;
+  $('q-total').textContent = TOTAL;
+  $('pass-line').textContent = PASS;
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function show(section){
+    cover.hidden = section !== cover;
+    quiz.hidden = section !== quiz;
+    result.hidden = section !== result;
+    window.scrollTo(0, 0);
+  }
+
+  function start(){
+    examinee = $('name').value.trim();
+    sets = QUESTIONS.map(function(item){ return shuffle([item.a].concat(item.o)); });
+    answers = QUESTIONS.map(function(){ return null; });
+    idx = 0;
+    var p = $('progress');
+    p.innerHTML = '';
+    for (var i = 0; i < TOTAL; i++) p.appendChild(document.createElement('li'));
+    show(quiz);
+    render(false);
+  }
+
+  function updateProgress(){
+    var items = $('progress').children;
+    for (var i = 0; i < items.length; i++) {
+      items[i].className = (answers[i] !== null ? 'done' : '') + (i === idx ? ' now' : '');
+    }
+  }
+
+  function updateNav(){
+    $('back').disabled = idx === 0;
+    $('next').disabled = answers[idx] === null;
+    $('next').textContent = idx === TOTAL - 1 ? '採点する' : 'つぎへ';
+  }
+
+  function render(moveFocus){
+    clearTimeout(timer);
+    $('q-num').textContent = idx + 1;
+    $('q-text').textContent = QUESTIONS[idx].q;
+    var list = $('choices');
+    list.innerHTML = '';
+    sets[idx].forEach(function(text, i){
+      var li = document.createElement('li');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'choice';
+      b.setAttribute('aria-pressed', answers[idx] === i ? 'true' : 'false');
+      var bubble = document.createElement('span');
+      bubble.className = 'bubble';
+      bubble.textContent = LABELS[i];
+      var label = document.createElement('span');
+      label.textContent = text;
+      b.appendChild(bubble);
+      b.appendChild(label);
+      b.addEventListener('click', function(){ choose(i); });
+      li.appendChild(b);
+      list.appendChild(li);
+    });
+    updateProgress();
+    updateNav();
+    if (moveFocus) $('q-text').focus({preventScroll:true});
+  }
+
+  function choose(i){
+    clearTimeout(timer);
+    answers[idx] = i;
+    var buttons = $('choices').querySelectorAll('.choice');
+    for (var k = 0; k < buttons.length; k++) {
+      buttons[k].setAttribute('aria-pressed', k === i ? 'true' : 'false');
+    }
+    updateProgress();
+    updateNav();
+    if (idx < TOTAL - 1) {
+      timer = setTimeout(function(){ idx++; render(true); }, 480);
+    }
+  }
+
+  function penPath(kind){
+    var cx = 60, cy = 60, pts = [], i, t, th, r;
+    if (kind === 'hana') {
+      var turns = 2.6, R = 29, N = 150;
+      for (i = 0; i <= N; i++) {
+        t = i / N; th = t * turns * 2 * Math.PI - Math.PI / 2; r = 2 + (R - 2) * t;
+        pts.push([cx + r * Math.cos(th), cy + r * Math.sin(th)]);
+      }
+      var th0 = turns * 2 * Math.PI - Math.PI / 2, petals = 7, M = 240;
+      for (i = 1; i <= M; i++) {
+        t = i / M; th = th0 + t * 2 * Math.PI; r = R + 17 * Math.abs(Math.sin(petals * t * Math.PI));
+        pts.push([cx + r * Math.cos(th), cy + r * Math.sin(th)]);
+      }
+    } else {
+      for (i = 0; i <= 120; i++) {
+        t = i / 120; th = t * 2.12 * Math.PI - Math.PI / 2; r = 38 + 5 * t;
+        pts.push([cx + r * Math.cos(th), cy + r * 0.92 * Math.sin(th)]);
+      }
+    }
+    return 'M' + pts.map(function(p){ return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' L');
+  }
+
+  function penMark(kind){
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 120 120');
+    svg.setAttribute('aria-hidden', 'true');
+    var path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', penPath(kind));
+    svg.appendChild(path);
+    return {svg: svg, path: path};
+  }
+
+  function judge(correct){
+    if (correct === TOTAL) return {pass:true, grade:'特級', mark:'hana', comment:'満点！ここまで知っているのはすごい。'};
+    if (correct >= HIGH)   return {pass:true, grade:'1級', mark:'hana', comment:'あと少しで満点。かなり詳しいです。'};
+    if (correct >= PASS)   return {pass:true, grade:'2級', mark:'maru', comment:'合格。まだ知らない一面もあります。'};
+    return {pass:false, grade:'', mark:null, comment:'追試です。もう一度どうぞ。'};
+  }
+
+  function reviewIcon(ok){
+    return ok
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="9" ry="8.4"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 19 19M19 5 5 19"/></svg>';
+  }
+
+  function finish(){
+    clearTimeout(timer);
+    var correct = 0;
+    var review = $('review');
+    review.innerHTML = '';
+
+    QUESTIONS.forEach(function(item, i){
+      var picked = sets[i][answers[i]];
+      var ok = picked === item.a;
+      if (ok) correct++;
+
+      var li = document.createElement('li');
+      var icon = document.createElement('div');
+      icon.innerHTML = reviewIcon(ok) + '<span class="sr">' + (ok ? '正解' : '不正解') + '</span>';
+      var body = document.createElement('div');
+
+      var rq = document.createElement('p');
+      rq.className = 'rq';
+      var num = document.createElement('span');
+      num.textContent = '問' + (i + 1);
+      rq.appendChild(num);
+      rq.appendChild(document.createTextNode(item.q));
+
+      var ra = document.createElement('p');
+      ra.className = 'ra';
+      ra.textContent = 'あなたの答え：' + picked;
+
+      body.appendChild(rq);
+      body.appendChild(ra);
+      if (!ok) {
+        var rc = document.createElement('p');
+        rc.className = 'rc hand';
+        rc.textContent = '正解は ' + item.a;
+        body.appendChild(rc);
+      }
+      li.appendChild(icon);
+      li.appendChild(body);
+      review.appendChild(li);
+    });
+
+    var j = judge(correct);
+    var points = Math.round(correct / TOTAL * 100);
+
+    var ex = $('examinee');
+    ex.hidden = !examinee;
+    ex.textContent = examinee ? '受験者：' + examinee : '';
+
+    var row = $('score-row');
+    row.innerHTML = '';
+    var mark = j.mark ? penMark(j.mark) : null;
+    if (mark) row.appendChild(mark.svg);
+    var score = document.createElement('p');
+    score.className = 'score hand';
+    score.appendChild(document.createTextNode(points));
+    var unit = document.createElement('small');
+    unit.textContent = '点';
+    score.appendChild(unit);
+    row.appendChild(score);
+
+    $('verdict').textContent = j.pass ? '判定　なる検定 ' + j.grade + ' 合格' : '判定　不合格';
+    $('comment').textContent = j.comment;
+    $('tally').textContent = TOTAL + '問中 ' + correct + '問正解';
+
+    show(result);
+
+    if (mark) {
+      var len = Math.ceil(mark.path.getTotalLength());
+      mark.path.style.setProperty('--len', len);
+      mark.path.setAttribute('class', 'pen-draw');
+    }
+    $('result-title').focus({preventScroll:true});
+  }
+
+  $('start').addEventListener('click', start);
+  $('back').addEventListener('click', function(){
+    if (idx > 0) { idx--; render(true); }
+  });
+  $('next').addEventListener('click', function(){
+    if (answers[idx] === null) return;
+    if (idx === TOTAL - 1) { finish(); }
+    else { idx++; render(true); }
+  });
+  $('retry').addEventListener('click', function(){
+    show(cover);
+  });
+})();
+</script>
+</body>
+</html>
